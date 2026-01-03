@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KDL 回合制战役模拟器</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- <header class="app-header">
+    <div class="app-header__title">
+      <h1>KDL 回合制战役模拟器</h1>
+      <p class="muted">计算对局结果：魔力 / 侵蚀 / 完成度，并给出推荐策略（可扩展技能）。</p>
+    </div>
+    <div class="app-header__actions">
+      <button id="btnExport" class="btn btn--ghost" type="button">导出存档</button>
+      <button id="btnImport" class="btn btn--ghost" type="button">导入存档</button>
+    </div>
+  </header> -->
+
+  <main class="container">
+    <section class="tabs" role="tablist" aria-label="战役页签">
+      <button class="tab tab--active" role="tab" aria-selected="true" aria-controls="panel-c1" id="tab-c1" data-tab="c1" type="button">战役一</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-c2" id="tab-c2" data-tab="c2" type="button">战役二</button>
+    </section>
+
+    <section id="panel-c1" class="panel panel--active" role="tabpanel" aria-labelledby="tab-c1" data-panel="c1">
+      <div class="grid">
+        <div class="card card--full">
+          <div class="card__header">
+            <div class="erosion-bar" aria-label="战役一侵蚀度" style="margin-right:16px">
+              <div class="erosion-bar__track">
+                <div class="erosion-bar__fill" id="c1ErosionBar" style="width:0%"></div>
+              </div>
+              <div class="erosion-bar__text" id="c1ErosionText">0/100</div>
+            </div>
+            <h2>战役一状态</h2>
+            <div class="pill" id="c1Summary">加载中…</div>
+          </div>
+          <div class="card__body">
+            <div class="main-layout">
+              <div class="main-layout__left">
+                <div class="team" id="c1Team"></div>
+                
+                <div class="progress" aria-label="战役一完成度">
+                  <div class="progress__track">
+                    <div class="progress__bar" id="c1ProgressBar" style="width:0%"></div>
+                  </div>
+                  <div class="progress__meta muted"><span>当前完成度</span><span id="c1ProgressText">0/100</span></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="battle">
+                  <div class="form-row">
+                    <button id="c1Simulate" class="btn btn--primary" type="button">模拟一场战斗</button>
+                    <button id="c1Undo" class="btn" type="button" disabled>撤销</button>
+                    <button id="c1Reset" class="btn btn--danger" type="button">重置战役一</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="main-layout__right">
+                <div class="battle__top">
+                  <h3 class="sub">选择敌人</h3>
+                  <div class="pill pill--ghost" id="c1Hint">点击页签选择敌人</div>
+                </div>
+                
+                <div class="enemy-area" aria-label="战役一敌人选择与能力">
+                  <div id="c1Enemies" class="enemy-row" aria-label="战役一敌人选择"></div>
+                  <div class="ability-buttons" id="c1AbilityButtons" aria-label="敌兽能力快捷选择">
+                    <button type="button" class="ability-btn" data-ability="tough">坚韧</button>
+                    <button type="button" class="ability-btn" data-ability="regen">再生</button>
+                    <button type="button" class="ability-btn" data-ability="drain">汲取</button>
+                    <button type="button" class="ability-btn" data-ability="giant">巨型</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card--full">
+          <div class="card__header">
+            <h2>战斗日志</h2>
+            <div class="pill pill--ghost"><span id="c1LogCount">0</span> 条</div>
+          </div>
+          <div class="card__body">
+            <div id="c1Log" class="log"></div>
+          </div>
+        </div>
+
+        <div class="card card--full">
+          <div class="card__header">
+            <h2>敌兽能力说明（战役一）</h2>
+            <div class="pill pill--ghost">四选一</div>
+          </div>
+          <div class="card__body">
+            <ul class="ability-list muted">
+              <li><b>坚韧</b>：受到的伤害降低 1 点</li>
+              <li><b>再生</b>：每轮恢复 2 点生命值</li>
+              <li><b>汲取</b>：每轮削减参战妖精兵 0.5 魔力</li>
+              <li><b>巨型</b>：生命值提高 30%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-c2" class="panel" role="tabpanel" aria-labelledby="tab-c2" data-panel="c2">
+      <div class="grid">
+        <div class="card card--full">
+          <div class="card__header">
+            <div class="erosion-bar" aria-label="战役二侵蚀度" style="margin-right:16px">
+              <div class="erosion-bar__track">
+                <div class="erosion-bar__fill" id="c2ErosionBar" style="width:0%"></div>
+              </div>
+              <div class="erosion-bar__text" id="c2ErosionText">0/100</div>
+            </div>
+            <h2>战役二状态</h2>
+            <div class="pill" id="c2Summary">加载中…</div>
+          </div>
+          <div class="card__body">
+            <div class="main-layout">
+              <div class="main-layout__left">
+                <div class="team" id="c2Team"></div>
+                
+                <div class="progress" aria-label="战役二完成度">
+                  <div class="progress__track">
+                    <div class="progress__bar" id="c2ProgressBar" style="width:0%"></div>
+                  </div>
+                  <div class="progress__meta muted"><span>当前完成度</span><span id="c2ProgressText">0/100</span></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="battle">
+                  <div class="form-row">
+                    <button id="c2Simulate" class="btn btn--primary" type="button">模拟一场战斗</button>
+                    <button id="c2Undo" class="btn" type="button" disabled>撤销</button>
+                    <button id="c2Reset" class="btn btn--danger" type="button">重置战役二</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="main-layout__right">
+                <div class="battle__top">
+                  <h3 class="sub">选择敌人</h3>
+                  <div class="pill pill--ghost" id="c2Hint">点击页签选择敌人</div>
+                </div>
+                
+                <div class="enemy-area" aria-label="战役二敌人选择与能力">
+                  <div id="c2Enemies" class="enemy-row" aria-label="战役二敌人选择"></div>
+                  <div class="ability-buttons-c2" id="c2AbilityButtons" aria-label="敌兽能力管理">
+                    <div class="ability-column">
+                      <div class="ability-column-title">能力1</div>
+                      <button type="button" class="ability-btn" data-ability="hard" data-c2-ability data-slot="0">坚硬</button>
+                      <button type="button" class="ability-btn" data-ability="spore" data-c2-ability data-slot="0">孢子</button>
+                      <button type="button" class="ability-btn" data-ability="lastWord" data-c2-ability data-slot="0">亡语</button>
+                      <button type="button" class="ability-btn" data-ability="stun" data-c2-ability data-slot="0">震慑</button>
+                    </div>
+                    <div class="ability-column">
+                      <div class="ability-column-title">能力2</div>
+                      <button type="button" class="ability-btn" data-ability="hard" data-c2-ability data-slot="1">坚硬</button>
+                      <button type="button" class="ability-btn" data-ability="spore" data-c2-ability data-slot="1">孢子</button>
+                      <button type="button" class="ability-btn" data-ability="lastWord" data-c2-ability data-slot="1">亡语</button>
+                      <button type="button" class="ability-btn" data-ability="stun" data-c2-ability data-slot="1">震慑</button>
+                      <button type="button" class="ability-btn" data-ability="none" data-c2-ability data-slot="1">无</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card--full">
+          <div class="card__header">
+            <h2>战斗日志</h2>
+            <div class="pill pill--ghost"><span id="c2LogCount">0</span> 条</div>
+          </div>
+          <div class="card__body">
+            <div id="c2Log" class="log"></div>
+          </div>
+        </div>
+
+        <div class="card card--full">
+          <div class="card__header">
+            <h2>敌兽能力说明（战役二）</h2>
+            <div class="pill pill--ghost">可叠加</div>
+          </div>
+          <div class="card__body">
+            <ul class="ability-list muted">
+              <li><b>坚硬</b>：只会受到来自主攻妖精兵的伤害</li>
+              <li><b>孢子</b>：死亡时生成的第六兽将额外获得一项能力</li>
+              <li><b>亡语</b>：死亡时削减主攻妖精兵10%魔力</li>
+              <li><b>震慑</b>：本次战斗结束，待机妖精兵无法恢复魔力</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      规则要点：每轮每名参战者消耗 1 魔力造成 2 伤害；主攻每轮额外 +1 魔力消耗；魔力不足则缺口计入全局侵蚀；
+      同一回合按队友顺序结算伤害，若中途击败敌人，本回合后续队友不消耗魔力。
+    -->
+
+    <section class="extra-info">
+      <div class="card card--full">
+        <div class="card__header">
+          <h2>额外说明</h2>
+        </div>
+        <div class="card__body">
+            <li><b>1.</b>：某些能力计算可能不准确，是否应该触发纯靠猜</li>
+            <li><b>2.</b>：侵蚀度计算这里推测不算魔力减免，但是算出来侵蚀一般比实际大1.</li>
+            <li><b>3.</b>：亡语和汲取这里推测不算魔力减免，且不会触发侵蚀</li>
+            <li><b>4.</b>：进度均耗是三人消耗加上侵蚀增加减去回魔量，除以进度值。通常越低越优秀，仅供参考。</li>
+            <li><b>5.</b>：一定要记得反复确认游戏内上阵情况！</li>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="ioDialog" class="dialog">
+    <form method="dialog" class="dialog__form">
+      <h3 id="ioTitle">存档</h3>
+      <p class="muted" id="ioHint">复制/粘贴 JSON。</p>
+      <textarea id="ioText" class="dialog__textarea" spellcheck="false"></textarea>
+      <div class="dialog__actions">
+        <button id="ioCancel" class="btn" value="cancel" type="submit">取消</button>
+        <button id="ioConfirm" class="btn btn--primary" value="confirm" type="submit">确定</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
